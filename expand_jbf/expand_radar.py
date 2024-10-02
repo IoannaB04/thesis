@@ -12,17 +12,33 @@ from nuscenes.utils.data_classes import RadarPointCloud
 import sys
 import time
 
+'''
+You have to download the nuscenes dataset in the dataset_download directory.
+
+This code expands the radar data using the JBF method. The output is in the created folder named 
+data_split. The output is sorted in train and validation sets.
+'''
+
 number_of_total_sweeps = 5
 
-# nuscenes_data_dir = r'/imec/users/bourch01/dl4ms/radar-camera-fusion-depth-main/data/nuscenes/'
-# nusc = NuScenes(version='v1.0-trainval', dataroot=nuscenes_data_dir, verbose=True)
+nuscenes_data_dir = r'/media/bourcha/F6C0FAB4C0FA79E7/bourcha/Nuscenes-dataset-full'
+nusc = NuScenes(version='v1.0-trainval', dataroot=nuscenes_data_dir, verbose=True)
 
-nuscenes_data_dir = r'/imec/users/bourch01/dl4ms/v1.0-mini/'
-nusc = NuScenes(version='v1.0-mini', dataroot=nuscenes_data_dir, verbose=True)
+# nuscenes_data_dir = r'/home/bourcha/Desktop/thesis_code/dataset_download/v1.0-mini'
+# nusc = NuScenes(version='v1.0-mini', dataroot=nuscenes_data_dir, verbose=True)
 
 
 # Define output directories
-base_output_dir = 'data_split'    
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(current_dir)
+
+''' the base_output_dir is the directory where the jbf output is saved '''
+# # mini dataset output in thesis_code folder
+# base_output_dir = os.path.join(parent_dir, 'data_split')
+
+# full dataset output in thesis_code folder
+base_output_dir = os.path.join(nuscenes_data_dir, 'data_split')
+
 train_dir = os.path.join(base_output_dir, 'train')
 validation_dir = os.path.join(base_output_dir, 'validation')
 
@@ -36,8 +52,9 @@ print(f'Validation samples: {len(val_scenes)}')
 if not os.path.exists("paths"):
     os.makedirs("paths")
 
+# paths for rgb images in nuscenes, need them for fusionnet
 train_filename = os.path.join("paths", "nuscenes_train_image.txt")
-val_filename = os.path.join("paths", "nuscenes_val_image.txt")
+val_filename = os.path.join("paths", "nuscenes_validation_image.txt")
 
 def create_output_directories(base_dir, scene_name):
     sub_dirs = [
@@ -147,10 +164,6 @@ def plot_image(type_file, data, name, scene_dir, image=None, colorbar=False):
             file_suffix = '_confidence_map.png'
 
     elif type_file == 'visualization':
-        if np.all(data == 0):
-            print("\tΌλα είναι 0.")
-            return 0
-
         ax.imshow(image)
         non_zero_indices = np.nonzero(data)
         non_zero_depths = data[non_zero_indices]
@@ -188,7 +201,7 @@ for scene_token, scene_samples in samples_by_scene.items():
     scene_name = scene['name']
 
     # scene_number = int(scene_name.split('-')[1])  # scene names are in the format "scene-XXXX" for nuscene dataset
-    # if scene_number < 1081:
+    # if scene_number < 1109 or scene_name in val_scenes:
     #     continue  # Skip scenes before 1080
 
     total_samples = len(scene_samples)
@@ -267,14 +280,14 @@ for scene_token, scene_samples in samples_by_scene.items():
 
         ''' PLOT RADAR POINTS ON TOP OF RGB IMAGE '''
         plot_image('radar_on_image', all_radar_points, name, directories['radar_on_image'], image=camera_image_np)
-        
+
 
         ''' APPLY JOINT BILATERAL FILTERS'''
         # Get camera intrinsic values
         camera_intrinsic = nusc.get('calibrated_sensor', camera_data['calibrated_sensor_token'])['camera_intrinsic']
         f_u = camera_intrinsic[0][0]
         f_v = camera_intrinsic[1][1]
-        
+
         # Apply the JBF method
         expanded_depth_map, confidence_map = jbf_method(all_radar_points, camera_image_np, camera_image_np.shape, f_u, f_v)
 
@@ -296,43 +309,31 @@ for scene_token, scene_samples in samples_by_scene.items():
     elapsed_time = end_time - start_time
     print(f"\nProcessing time for scene {scene_name}: {elapsed_time:.2f} seconds\n")
 
-# print()
-
 
 ''' Functions to create path txt files'''
 def list_files_in_directory(directory):
-    # Λίστα για να αποθηκεύσει όλα τα μονοπάτια των αρχείων
     files_list = []
     for root, dirs, files in os.walk(directory):
         for file in files:
             files_list.append(os.path.join(root, file))
     return files_list
 
-def create_file_paths(base_output_dir, main_folder):
+def create_file_paths(base_output_dir, main_folder, parent_dir):
     main_dir = os.path.join(base_output_dir, main_folder)
-    paths_dir = os.path.join(os.path.dirname(base_output_dir), 'paths')
+    paths_dir = os.path.join(parent_dir, 'paths')
 
-    # Δημιουργία του φακέλου paths αν δεν υπάρχει
-    if not os.path.exists(paths_dir):
-        os.makedirs(paths_dir)
-    
-    # Περνάμε από κάθε υποφάκελο πρώτου επιπέδου στον φάκελο main_folder
     for sub_dir in os.listdir(main_dir):
         sub_dir_path = os.path.join(main_dir, sub_dir)
         if os.path.isdir(sub_dir_path):
-            # Δημιουργία αρχείου output_prefix_{sub_dir} στο φάκελο paths
             output_file = os.path.join(paths_dir, f'nuscenes_{main_folder}_{sub_dir}.txt')
             with open(output_file, 'w') as f:
-                # Λήψη όλων των μονοπατιών των αρχείων στον τρέχον υποφάκελο
                 files = list_files_in_directory(sub_dir_path)
-                # Γράψιμο των μονοπατιών των αρχείων στο αρχείο
                 for file_path in files:
                     f.write(f"{file_path}\n")
 
-create_file_paths(base_output_dir, 'train')
-create_file_paths(base_output_dir, 'validation')
+create_file_paths(base_output_dir, 'train', current_dir)
+print("Done with training paths")
+create_file_paths(base_output_dir, 'validation', current_dir)
+print("Done with validation paths")
 
 print()
-
-
-# ioanna
