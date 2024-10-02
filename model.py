@@ -11,7 +11,7 @@ from torch import optim
 
 from evaluation import evaluator
 from losses.TotalLoss import TotalLoss
-from fusion_net.fusion_net import FusionNetModel as DepthNet
+from fusion_net.fusionnet_model import FusionNetModel as DepthNet
 from pose_net.pose_net import PoseNet
 from utils.depth import inv2depth
 from utils.image import flip_lr
