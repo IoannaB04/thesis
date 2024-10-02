@@ -3,7 +3,7 @@
 import torch
 import torch.nn as nn
 
-from fusion_net.fusion_net import FusionNetModel # as DepthNet
+from fusion_net.fusionnet_model import FusionNetModel # as DepthNet
 
 
 class BerHuLoss(nn.Module):
