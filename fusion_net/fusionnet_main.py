@@ -8,10 +8,6 @@ from log_utils import log
 from fusionnet_model import FusionNetModel
 from fusionnet_transforms import Transforms
 
-
-from torch.cuda.amp import autocast, GradScaler
-
-
 def train(train_image_path,
           train_depth_path,
           train_response_path,
