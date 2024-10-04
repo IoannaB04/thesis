@@ -147,7 +147,7 @@ def train(train_image_path,
             ground_truth_paths=val_ground_truth_paths),
         batch_size=1,
         shuffle=False,
-        num_workers=1,
+        num_workers=0,
         drop_last=False)
 
     val_transforms = Transforms(

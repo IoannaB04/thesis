@@ -66,7 +66,8 @@ n_step_per_summary = 5000
 start_step_validation = 25000
 n_thread = 0
 
-restore_path = f'/media/bourcha/F6C0FAB4C0FA79E7/bourcha/trained_fusionnet/fus18project6ms1bn_16x448x448_lr0-1e3_100_aug0-100_100_bri080-120_con080-120_sat080-120_hflip_l1_sm000_wd000_outrm7-150_dilate0_min1max100_lidar_loss200_interp_with_reproj/model-20000.pth'
+restore_path = f'/media/bourcha/F6C0FAB4C0FA79E7/bourcha/trained_fusionnet/fus18project6ms1bn_16x448x448_lr0-1e3_100_aug0-100_100_bri080-120_con080-120_sat080-120_hflip_l1_sm000_wd000_outrm7-150_dilate0_min1max100_lidar_loss200_interp_with_reproj'
+restore_path = restore_path +'/model-40000.pth'
 
 
 if __name__ == '__main__':
