@@ -21,8 +21,8 @@ data_split. The output is sorted in train and validation sets.
 
 number_of_total_sweeps = 5
 
-nuscenes_data_dir = r'/media/bourcha/F6C0FAB4C0FA79E7/bourcha/Nuscenes-dataset-full'
-nusc = NuScenes(version='v1.0-trainval', dataroot=nuscenes_data_dir, verbose=True)
+nuscenes_data_dir = r'C:\Users\Black Pearl\Desktop\thesis_code\downloaded_dataset'
+nusc = NuScenes(version='v1.0-mini', dataroot=nuscenes_data_dir, verbose=True)
 
 # nuscenes_data_dir = r'/home/bourcha/Desktop/thesis_code/dataset_download/v1.0-mini'
 # nusc = NuScenes(version='v1.0-mini', dataroot=nuscenes_data_dir, verbose=True)
